@@ -1,0 +1,7 @@
+---
+proxy_proto: "http" #may be http, socks or socks5
+proxy_address: ""
+proxy_port: ""
+proxy_auth: false
+proxy_user: ""
+proxy_pass: ""

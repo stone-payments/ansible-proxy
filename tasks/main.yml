@@ -1,0 +1,24 @@
+---
+- name: configure yum to use the proxy
+  lineinfile:
+    path: "/etc/yum.conf"
+    regexp: '^proxy=.*'
+    line: "proxy={{proxy_proto}}://{{proxy_address}}:{{proxy_port}}"
+
+- name: configure yum to use the proxy authentication
+  lineinfile:
+    path: "/etc/yum.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: '^proxy_username=.*'
+      line: "proxy_username={{proxy_user}}"
+    - regexp: '^proxy_password=.*'
+      line: "proxy_password={{proxy_pass}}"
+  when: proxy_auth is defined and proxy_auth
+
+- name: configure the default profile to use the proxy
+  template:
+    src: "proxy.profile"
+    dest: "/etc/profile.d/proxy.sh"
+    mode: "0755"
