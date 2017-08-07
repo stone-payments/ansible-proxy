@@ -1,0 +1,20 @@
+---
+- name: configure yum to not use the proxy
+  lineinfile:
+    path: "/etc/yum.conf"
+    regexp: '^proxy=.*'
+    state: absent
+
+- name: configure yum to not use proxy authentication
+  lineinfile:
+    path: "/etc/yum.conf"
+    regexp: "{{ item.regexp }}"
+    state: absent
+  with_items:
+    - regexp: '^proxy_username=.*'
+    - regexp: '^proxy_password=.*'
+
+- name: configure the default profile to not use a proxy
+  file:
+    path: "/etc/profile.d/proxy.sh"
+    state: absent
