@@ -28,7 +28,7 @@
       line: "proxy_password={{proxy_pass}}"
   when: proxy_auth is defined and proxy_auth
 
-- name: configure RHSM to use the proxy authentication
+- name: configure RHSM to use the proxy authentication (HTTP-only)
   lineinfile:
     path: "/etc/rhsm/rhsm.conf"
     regexp: "{{ item.regexp }}"
@@ -38,7 +38,7 @@
       line: "proxy_user={{proxy_user}}"
     - regexp: '^proxy_password\s*=.*'
       line: "proxy_password={{proxy_pass}}"
-  when: proxy_auth is defined and proxy_auth
+  when: proxy_auth is defined and proxy_auth and proxy_proto is defined and proxy_proto is "http"
 
 - name: configure the default profile to use the proxy
   template:

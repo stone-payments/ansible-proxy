@@ -2,8 +2,17 @@
 - name: configure yum to not use the proxy
   lineinfile:
     path: "/etc/yum.conf"
-    regexp: '^proxy=.*'
+    regexp: '^proxy\s*=.*'
     state: absent
+
+- name: configure RHSM to not use the proxy
+  lineinfile:
+    path: "/etc/rhsm/rhsm.conf"
+    regexp: "{{ item.regexp }}"
+    state: absent
+  with_items:
+    - regexp: '^proxy_hostname\s*=.*'
+    - regexp: '^proxy_port\s*=.*'
 
 - name: configure yum to not use proxy authentication
   lineinfile:
@@ -11,8 +20,17 @@
     regexp: "{{ item.regexp }}"
     state: absent
   with_items:
-    - regexp: '^proxy_username=.*'
-    - regexp: '^proxy_password=.*'
+    - regexp: '^proxy_username\s*=.*'
+    - regexp: '^proxy_password\s*=.*'
+
+- name: configure RHSM to not use the proxy authentication
+  lineinfile:
+    path: "/etc/rhsm/rhsm.conf"
+    regexp: "{{ item.regexp }}"
+    state: absent
+  with_items:
+    - regexp: '^proxy_user\s*=.*'
+    - regexp: '^proxy_password\s*=.*'
 
 - name: configure the default profile to not use a proxy
   file:
