@@ -2,8 +2,19 @@
 - name: configure yum to use the proxy
   lineinfile:
     path: "/etc/yum.conf"
-    regexp: '^proxy=.*'
+    regexp: '^proxy\s*=.*'
     line: "proxy={{proxy_proto}}://{{proxy_address}}:{{proxy_port}}"
+
+- name: configure RHSM to use the proxy
+  lineinfile:
+    path: "/etc/rhsm/rhsm.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: '^proxy_hostname\s*=.*'
+      line: "proxy_hostname={{proxy_address}}"
+    - regexp: '^proxy_port\s*=.*'
+      line: "proxy_port={{proxy_port}}"
 
 - name: configure yum to use the proxy authentication
   lineinfile:
@@ -11,9 +22,21 @@
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
   with_items:
-    - regexp: '^proxy_username=.*'
+    - regexp: '^proxy_username\s*=.*'
       line: "proxy_username={{proxy_user}}"
-    - regexp: '^proxy_password=.*'
+    - regexp: '^proxy_password\s*=.*'
+      line: "proxy_password={{proxy_pass}}"
+  when: proxy_auth is defined and proxy_auth
+
+- name: configure RHSM to use the proxy authentication
+  lineinfile:
+    path: "/etc/rhsm/rhsm.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: '^proxy_user\s*=.*'
+      line: "proxy_user={{proxy_user}}"
+    - regexp: '^proxy_password\s*=.*'
       line: "proxy_password={{proxy_pass}}"
   when: proxy_auth is defined and proxy_auth
 
