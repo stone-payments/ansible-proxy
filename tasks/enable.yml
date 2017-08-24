@@ -38,7 +38,7 @@
       line: "proxy_user={{proxy_user}}"
     - regexp: '^proxy_password\s*=.*'
       line: "proxy_password={{proxy_pass}}"
-  when: proxy_auth is defined and proxy_auth and proxy_proto is defined and proxy_proto is "http"
+  when: proxy_auth is defined and proxy_auth and proxy_proto is defined and proxy_proto == "http"
 
 - name: configure the default profile to use the proxy
   template:
