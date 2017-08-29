@@ -5,3 +5,6 @@ proxy_port: ""
 proxy_auth: false
 proxy_user: ""
 proxy_pass: ""
+proxy_whitelist:
+  - "127.0.0.1"
+  - "localhost"

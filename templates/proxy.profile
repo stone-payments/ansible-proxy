@@ -9,3 +9,7 @@ export http_proxy=$proxy \
        PROXY=$proxy \
        HTTP_PROXY=$proxy \
        HTTPS_PROXY=$proxy
+
+export no_proxy={{ proxy_whitelist | join(",") }}
+
+export NO_PROXY=$no_proxy

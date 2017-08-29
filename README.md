@@ -24,10 +24,16 @@ proxy_port: ""
 proxy_auth: false
 proxy_user: ""
 proxy_pass: ""
+proxy_whitelist:
+  - "127.0.0.1"
+  - "localhost"
 ```
 
 If you're going to use authentication, you need both to inform the user/pass
 and enable it by setting `proxy_auth` to true.
+
+You may also pass a list in `proxy_whitelist` of names or IPs that you do not
+want to use the proxy and access directly.
 
 ## License
 This code is licensed under the MIT license.
