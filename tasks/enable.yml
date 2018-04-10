@@ -15,6 +15,7 @@
       line: "proxy_hostname={{proxy_address}}"
     - regexp: '^proxy_port\s*=.*'
       line: "proxy_port={{proxy_port}}"
+  when: ansible_distribution == "Red Hat Enterprise Linux"
 
 - name: configure yum to use the proxy authentication
   lineinfile:
@@ -38,7 +39,7 @@
       line: "proxy_user={{proxy_user}}"
     - regexp: '^proxy_password\s*=.*'
       line: "proxy_password={{proxy_pass}}"
-  when: proxy_auth is defined and proxy_auth and proxy_proto is defined and proxy_proto == "http"
+  when: ansible_distribution == "Red Hat Enterprise Linux" and proxy_auth is defined and proxy_auth and proxy_proto is defined and proxy_proto == "http"
 
 - name: configure the default profile to use the proxy
   template:
