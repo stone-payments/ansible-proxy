@@ -5,7 +5,7 @@
     regexp: '^proxy\s*=.*'
     line: "proxy={{proxy_proto}}://{{proxy_address}}:{{proxy_port}}"
 
-- name: configure RHSM to use the proxy
+- name: configure RHSM to use the proxy (HTTP-only)
   lineinfile:
     path: "/etc/rhsm/rhsm.conf"
     regexp: "{{ item.regexp }}"
@@ -15,7 +15,10 @@
       line: "proxy_hostname={{proxy_address}}"
     - regexp: '^proxy_port\s*=.*'
       line: "proxy_port={{proxy_port}}"
-  when: ansible_distribution == "Red Hat Enterprise Linux"
+  when:
+    - ansible_distribution == "Red Hat Enterprise Linux"
+    - proxy_proto is defined
+    - proxy_proto == "http"
 
 - block:
   - name: configure yum to use the proxy authentication
