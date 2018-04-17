@@ -17,6 +17,7 @@ Just include the role and set the variables in the `defaults/main.yml` file:
 ## Advanced usage
 You may also setup another proxy protocol than HTTP (SOCKS or SOCKS5, maybe)
 and setup authentication by using the following vars:
+
 ```yaml
 proxy_proto: "http" #may be http, socks or socks5
 proxy_address: ""
