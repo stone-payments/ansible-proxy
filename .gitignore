@@ -1,0 +1,2 @@
+molecule/*/tests/*.pyc
+molecule/*/tests/__pycache__/
