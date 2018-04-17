@@ -1,0 +1,8 @@
+---
+- name: Configure proxy client
+  hosts: all
+  roles:
+    - role: stone-payments.proxy
+  vars:
+    proxy_address: ""
+    proxy_port: ""
