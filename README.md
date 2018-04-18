@@ -2,7 +2,11 @@
 Role for Ansible which configures the proxy client parameters in RHEL systems
 
 ## Dependencies
-None yet.
+To configure Proxy on a Windows host you're gonna need it to install the DSC Resource [`xNetworking`](https://github.com/PowerShell/xNetworking) in the host. To install this, run following command:
+
+```powershell
+Install-Module -Name xNetworking -Repository PSGallery -Force
+```
 
 ## Usage
 Just include the role and set the variables in the [`defaults/main.yml`](defaults/main.yml) file:
