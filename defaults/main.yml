@@ -1,10 +1,12 @@
 ---
-proxy_proto: "http" #may be http, socks or socks5
+# may be http, socks or socks5
+proxy_proto: "http"
+
 proxy_address: ""
 proxy_port: ""
 proxy_auth: false
 proxy_user: ""
 proxy_pass: ""
-proxy_whitelist:
+proxy_bypass:
   - "127.0.0.1"
   - "localhost"

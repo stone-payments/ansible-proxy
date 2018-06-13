@@ -1,0 +1,25 @@
+---
+- name: removes registry keys to configure proxy polices
+  win_regedit:
+    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Internet Settings
+    name: ProxySettingsPerUser
+    state: absent
+
+- name: removes registry keys to configure proxy
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - ProxyEnable
+    - ProxyServer
+    - ProxyOverride
+
+- name: removes proxy using xProxySettings DSC Resource
+  win_dsc:
+    resource_name: xProxySettings
+    IsSingleInstance: 'Yes'
+    Ensure: Absent
+    EnableAutoDetection: true
+    EnableAutoConfiguration: true
+    EnableManualProxy: false
