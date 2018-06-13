@@ -16,7 +16,7 @@
     - regexp: '^proxy_port\s*=.*'
       line: "proxy_port={{proxy_port}}"
   when:
-    - ansible_distribution == "Red Hat Enterprise Linux"
+    - ansible_distribution == "RedHat"
     - proxy_proto is defined
     - proxy_proto == "http"
 
@@ -43,7 +43,7 @@
       - regexp: '^proxy_password\s*=.*'
         line: "proxy_password={{proxy_pass}}"
     when:
-      - ansible_distribution == "Red Hat Enterprise Linux"
+      - ansible_distribution == "RedHat"
       - proxy_proto is defined
       - proxy_proto == "http"
   when:
