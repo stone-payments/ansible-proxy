@@ -1,13 +1,5 @@
 ---
-- name: adds registry keys to configure proxy polices
-  win_regedit:
-    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Internet Settings
-    name: ProxySettingsPerUser
-    type: dword
-    data: 0
-    state: present
-
-- name: adds registry keys to configure proxy
+- name: configure legacy applications to use the system proxy
   win_regedit:
     path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings
     name: "{{ item.name }}"
@@ -15,11 +7,20 @@
     data: "{{ item.data }}"
     state: present
   with_items:
-    - { name: ProxyEnable, type: dword, data: 1 }
-    - { name: ProxyServer, type: string, data: "{{ proxy_address }}:{{ proxy_port }}" }
-    - { name: ProxyOverride, type: multistring, data: "{{ proxy_bypass + ['<local>'] }}" }
+    - name: ProxySettingsPerUser
+      type: dword
+      data: 0
+    - name: ProxyEnable
+      type: dword
+      data: 1
+    - name: ProxyServer
+      type: string
+      data: "{{ 'socks=' if 'socks' in proxy_proto else '' }}{{ proxy_address }}:{{ proxy_port }}"
+    - name: ProxyOverride
+      type: multistring
+      data: "{{ (proxy_whitelist + ['<local>']) | join(';') }}"
 
-- name: configures proxy using xProxySettings DSC Resource
+- name: configure updated applications to use the system proxy
   win_dsc:
     resource_name: xProxySettings
     IsSingleInstance: 'Yes'
@@ -27,6 +28,6 @@
     EnableAutoDetection: false
     EnableAutoConfiguration: false
     EnableManualProxy: true
-    ProxyServer: "{{ proxy_address }}:{{ proxy_port }}"
-    ProxyServerExceptions: "{{ proxy_bypass }}"
+    ProxyServer: "{{ 'socks=' if 'socks' in proxy_proto else '' }}{{ proxy_address }}:{{ proxy_port }}"
+    ProxyServerExceptions: "{{ proxy_whitelist | join(';') }}"
     ProxyServerBypassLocal: true

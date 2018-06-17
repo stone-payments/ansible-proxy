@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Bernardo Donadio
-  description: Configure a RHEL client to use a proxy
+  description: Configure a client to use a system proxy
   company: Stone Payments
   license: MIT
   min_ansible_version: 2.0.0

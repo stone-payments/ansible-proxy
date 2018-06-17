@@ -1,5 +1,5 @@
 stone-payments.proxy
-============
+====================
 Role for Ansible which configures the proxy client parameters in RHEL systems
 
 ## Usage
@@ -33,8 +33,32 @@ proxy_whitelist:
 If you're going to use authentication, you need both to inform the user/pass
 and enable it by setting `proxy_auth` to true.
 
-You may also pass a list in `proxy_whitelist` of names or IPs that you do not
+You may also pass a list in `proxy_whitelist` with names or IPs that you do not
 want to use the proxy and access directly.
+
+## Testing
+This role implements unit tests with [Molecule](https://molecule.readthedocs.io/) on Vagrant for Windows tests. Notice
+that we only support Molecule 2.0 or greater. You can install Molecule inside a virtual environment with the following
+command:
+```sh
+virtualenv .venv
+.venv/bin/activate
+pip install molecule
+```
+You can install Vagrant with your distro package-manager (out of scope), but you will also need some plugins to
+interact with Windows trough the WinRM interface:
+```sh
+vagrant plugin install winrm{,-fs,-elevated}
+```
+
+After having Molecule setup within the virtualenv, you can run the tests with:
+```sh
+molecule converge [-s scenario_name]
+```
+Where `scenario_name` is the name of a test case under `molecule`. The test case for Windows is `windows`.
+
+## Contributing
+Just open a PR. We love PRs!
 
 ## License
 This code is licensed under the MIT license.

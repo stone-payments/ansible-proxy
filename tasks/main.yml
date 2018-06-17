@@ -1,8 +1,8 @@
 ---
-- name: includes tasks if SO be Windows
+- name: run Windows tasks
   include_tasks: windows/main.yml
   when: ansible_os_family == "Windows"
 
-- name: includes tasks if SO not be Windows
+- name: run GNU/Linux tasks
   include_tasks: linux/main.yml
   when: ansible_os_family != "Windows"
