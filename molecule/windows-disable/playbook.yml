@@ -1,0 +1,5 @@
+---
+- name: disable proxy client
+  hosts: all
+  roles:
+    - role: stone-payments.proxy

@@ -1,0 +1,33 @@
+---
+- name: configure legacy applications to use the system proxy
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings
+    name: "{{ item.name }}"
+    type: "{{ item.type }}"
+    data: "{{ item.data }}"
+    state: present
+  with_items:
+    - name: ProxySettingsPerUser
+      type: dword
+      data: 0
+    - name: ProxyEnable
+      type: dword
+      data: 1
+    - name: ProxyServer
+      type: string
+      data: "{{ 'socks=' if 'socks' in proxy_proto else '' }}{{ proxy_address }}:{{ proxy_port }}"
+    - name: ProxyOverride
+      type: multistring
+      data: "{{ (proxy_whitelist + ['<local>']) | join(';') }}"
+
+- name: configure updated applications to use the system proxy
+  win_dsc:
+    resource_name: xProxySettings
+    IsSingleInstance: 'Yes'
+    Ensure: Present
+    EnableAutoDetection: false
+    EnableAutoConfiguration: false
+    EnableManualProxy: true
+    ProxyServer: "{{ 'socks=' if 'socks' in proxy_proto else '' }}{{ proxy_address }}:{{ proxy_port }}"
+    ProxyServerExceptions: "{{ proxy_whitelist | join(';') }}"
+    ProxyServerBypassLocal: true
