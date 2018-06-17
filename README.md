@@ -1,6 +1,6 @@
 stone-payments.proxy
 ====================
-Role for Ansible which configures the proxy client parameters in RHEL systems
+Role for Ansible which configures the proxy client parameters in GNU/Linux and Windows systems.
 
 ## Usage
 Just include the role and set the variables in the `defaults/main.yml` file:
@@ -55,7 +55,7 @@ After having Molecule setup within the virtualenv, you can run the tests with:
 ```sh
 molecule converge [-s scenario_name]
 ```
-Where `scenario_name` is the name of a test case under `molecule`. The test case for Windows is `windows`.
+Where `scenario_name` is the name of a test case under `molecule`.
 
 ## Contributing
 Just open a PR. We love PRs!
