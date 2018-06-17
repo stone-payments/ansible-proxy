@@ -24,11 +24,17 @@
 $params = Parse-Args $args -supports_check_mode $true
 
 $name = Get-AnsibleParam -obj $params "name" -type "str" -failifempty $true
-$repo = Get-AnsibleParam -obj $params "repository" -type "str" 
+$repo = Get-AnsibleParam -obj $params "repository" -type "str"
 $url = Get-AnsibleParam -obj $params "url" -type "str"
 $state = Get-AnsibleParam -obj $params "state" -type "str" -default "present" -validateset "present", "absent"
 $allow_clobber = Get-AnsibleParam -obj $params "allow_clobber" -type "bool" -default $false
 $check_mode = Get-AnsibleParam -obj $params -name "_ansible_check_mode" -default $false
+
+$version = @{
+    RequiredVersion = Get-AnsibleParam -obj $params -name "required_version" -type "str"
+    MinimumVersion = Get-AnsibleParam -obj $params -name "minimum_version" -type "str"
+    MaximumVersion = Get-AnsibleParam -obj $params -name "maximum_version" -type "str"
+}
 
 $result = @{"changed" = $false
             "output" = ""
@@ -64,10 +70,10 @@ Function Install-Repository {
     $Repo = (Get-PSRepository).SourceLocation
 
     # If repository isn't already present, try to register it as trusted.
-    if ($Repo -notcontains $Url){ 
+    if ($Repo -notcontains $Url){
       try {
            if (!($CheckMode)) {
-               Register-PSRepository -Name $Name -SourceLocation $Url -InstallationPolicy Trusted -ErrorAction Stop       
+               Register-PSRepository -Name $Name -SourceLocation $Url -InstallationPolicy Trusted -ErrorAction Stop
            }
           $result.changed = $true
           $result.repository_changed = $true
@@ -90,7 +96,7 @@ Function Remove-Repository{
 
     # Try to remove the repository
     if ($Repo -contains $Name){
-        try {         
+        try {
             if (!($CheckMode)) {
                 Unregister-PSRepository -Name $Name -ErrorAction Stop
             }
@@ -104,19 +110,68 @@ Function Remove-Repository{
     }
 }
 
+Function Need-Install-PsModule {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Name,
+        [string]$RequiredVersion,
+        [string]$MinimumVersion,
+        [string]$MaximumVersion
+    )
+
+    $Installed = Get-Module -ListAvailable -Name $Name
+
+    if ($RequiredVersion) {
+        if($Installed|?{[System.Version]$_.Version -eq [System.Version]$RequiredVersion}) {
+            $result.output = "Module $($Name) version present already is $($RequiredVersion)"
+            return $false;
+        }
+        return $true;
+    }
+
+    if ($MinimumVersion -and $MaximumVersion) {
+        if($Installed|?{[System.Version]$_.version -ge [System.Version]$MinimumVersion -and [System.Version]$_.version -le [System.Version]$MaximumVersion}) {
+            $result.output = "Module $($Name) version present already less than or equal to $($MaximumVersion) and greater than or equal to $($MinimumVersion)"
+            return $false;
+        }
+        return $true;
+    }
+
+    if ($MinimumVersion) {
+        if($Installed|?{[System.Version]$_.version -ge [System.Version]$MinimumVersion}) {
+            $result.output = "Module $($Name) version present already greater than or equal to $($MinimumVersion)"
+            return $false;
+        }
+        return $true;
+    }
+
+    if ($MaximumVersion) {
+        if($Installed|?{[System.Version]$_.version -le [System.Version]$MaximumVersion}) {
+            $result.output = "Module $($Name) version present already less than or equal to $($MaximumVersion)"
+            return $false;
+        }
+        return $true;
+    }
+
+    if ($Installed){
+        $result.output = "Module $($Name) already present"
+        return $false;
+    }
+    return $true;
+}
+
 Function Install-PsModule {
     param(
       [Parameter(Mandatory=$true)]
       [string]$Name,
       [string]$Repository,
       [bool]$AllowClobber,
+      [string]$MinimumVersion,
+      [string]$MaximumVersion,
+      [string]$RequiredVersion,
       [bool]$CheckMode
     )
-    if (Get-Module -Listavailable|?{$_.name -eq $Name}){
-        $result.output = "Module $($Name) already present"
-    }
-    else {      
-      try{
+    try{
         # Install NuGet Provider if needed
         Install-NugetProvider -CheckMode $CheckMode;
 
@@ -132,20 +187,30 @@ Function Install-PsModule {
             $ht["Repository"] = "$Repository";
         }
 
+        # If any version config is specified, use them
+        if ($MinimumVersion) {
+            $ht["MinimumVersion"] = "$MinimumVersion";
+        }
+        if ($MaximumVersion) {
+            $ht["MaximumVersion"] = "$MaximumVersion";
+        }
+        if ($RequiredVersion) {
+            $ht["RequiredVersion"] = "$RequiredVersion";
+        }
+
         # Check Powershell Version (-AllowClobber was introduced in PowerShellGet 1.6.0)
         if ("AllowClobber" -in ((Get-Command PowerShellGet\Install-Module | Select -ExpandProperty Parameters).Keys)) {
-          $ht['AllowClobber'] = $AllowClobber;
+            $ht['AllowClobber'] = $AllowClobber;
         }
-        
+
         Install-Module @ht | out-null;
-        
+
         $result.output = "Module $($Name) installed"
         $result.changed = $true
-      }
-      catch{
+    }
+    catch{
         $ErrorMessage = "Problems installing $($Name) module: $($_.Exception.Message)"
         Fail-Json $result $ErrorMessage
-      }
     }
 }
 
@@ -181,17 +246,24 @@ if ($PsVersion.Major -lt 5){
 }
 
 if ($state -eq "present") {
+    if (($version['RequiredVersion']) -and (($version['MinimumVersion']) -or ($version['MaximumVersion']))) {
+        $ErrorMessage = "You must not use Required Version if you use either Minimum or Maximum Version"
+        Fail-Json $result $ErrorMessage
+    }
+
     if (($repo) -and ($url)) {
-        Install-Repository -Name $repo -Url $url -CheckMode $check_mode 
+        Install-Repository -Name $repo -Url $url -CheckMode $check_mode
     }
     else {
         $ErrorMessage = "Repository Name and Url are mandatory if you want to add a new repository"
     }
 
-    Install-PsModule -Name $Name -Repository $repo -CheckMode $check_mode -AllowClobber $allow_clobber;
+    if((Need-Install-PsModule -Name $Name @version)) {
+        Install-PsModule -Name $Name -Repository $repo -CheckMode $check_mode -AllowClobber $allow_clobber @version;
+    }
 }
-else {  
-    if ($repo) {   
+else {
+    if ($repo) {
         Remove-Repository -Name $repo -CheckMode $check_mode
     }
     Remove-PsModule -Name $Name -CheckMode $check_mode

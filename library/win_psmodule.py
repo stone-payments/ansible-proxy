@@ -28,6 +28,22 @@ options:
       - If C(yes) imports all commands, even if they have the same names as commands that already exists. Available only in Powershell 5.1 or higher.
     type: bool
     default: 'no'
+  minimum_version:
+    description:
+      - Minimum version of module to install. Cannot be used with required_version.
+      - If the module is already installed and its version is less than the specified version, the highest available version will be installed side-by-side.
+      - If the maximum_version is also specified, this version will be considered the highest available.
+    type: str
+  maximum_version:
+    description:
+      - Maximum version of module to install. Cannot be used with required_version.
+      - If the module is already installed and its version is greater than the specified version, the specified version will be installed side-by-side.
+    type: str
+  required_version:
+    description:
+      - Require a specific version of module to install. Cannot be used with either minimum_version or maximum_version.
+      - If a different version of the same module is already installed, the specified version will be installed side-by-side.
+    type: str
   repository:
     description:
       - Name of the custom repository to register or use.
@@ -45,6 +61,7 @@ notes:
 
 author:
 - Daniele Lazzari
+- Bernardo Donadio
 '''
 
 EXAMPLES = '''
@@ -65,6 +82,12 @@ EXAMPLES = '''
   win_psmodule:
     name: PowershellModule
     repository: MyRepository
+    state: present
+
+- name: Install a powershell module requiring a minimum version
+  win_psmodule:
+    name: PowershellModule
+    minimum_version: 5.2.0.0
     state: present
 
 - name: Remove a powershell module
