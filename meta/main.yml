@@ -4,14 +4,15 @@ galaxy_info:
   description: Configure a client to use a system proxy
   company: Stone Payments
   license: MIT
-  min_ansible_version: 2.0.0
+  min_ansible_version: 2.8.0
   platforms:
     - name: EL
       versions:
         - 7
     - name: Windows
       versions:
-        - 2016Core
+        - 2019
+        - 2016
         - 2012R2
   galaxy_tags:
     - system
