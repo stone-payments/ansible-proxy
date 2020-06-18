@@ -1,27 +1,32 @@
 ---
-- name: remove enforcement of uniform proxy settings for all user accounts
-  win_regedit:
-    path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Internet Settings
-    name: ProxySettingsPerUser
-    state: absent
+- name: Task block to configure Windows INet which includes Internet Explorer
+  block:
+    - name: Remove enforcement of uniform proxy settings for all user accounts
+      win_regedit:
+        path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\Internet Settings
+        name: ProxySettingsPerUser
+        state: absent
 
-- name: remove legacy proxy settings
-  win_regedit:
-    path: HKLM:\SOFTWARE{{ item.0 }}\Microsoft\Windows\CurrentVersion\Internet Settings
-    name: "{{ item.1.name }}"
-    state: absent
-  with_nested:
-    - - ""
-      - \WOW6432Node
-    - - name: ProxyEnable
-      - name: ProxyServer
-      - name: ProxyOverride
+    - name: Remove legacy proxy settings
+      win_regedit:
+        path: HKLM:\SOFTWARE{{ item.0 }}\Microsoft\Windows\CurrentVersion\Internet Settings
+        name: "{{ item.1.name }}"
+        state: absent
+      with_nested:
+        - - ""
+          - \WOW6432Node
+        - - name: ProxyEnable
+          - name: ProxyServer
+          - name: ProxyOverride
 
-- name: remove updated applications proxy settings
-  win_dsc:
-    resource_name: xProxySettings
-    IsSingleInstance: 'Yes'
-    Ensure: Absent
-    EnableAutoDetection: true
-    EnableAutoConfiguration: true
-    EnableManualProxy: false
+    - name: Remove any Windows INet explicit proxies that are set
+      win_inet_proxy:
+        proxy: ''
+        bypass: ''
+  when: proxy_win_inet
+
+- name: Remove any Windows HTTP Services (WinHTTP) proxy settings
+  win_http_proxy:
+    proxy: ''
+    bypass: ''
+  when: proxy_win_http
