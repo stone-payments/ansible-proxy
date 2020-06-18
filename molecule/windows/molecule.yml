@@ -8,16 +8,24 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: proxy
-    box: mwrock/Windows2016
-    cpus: 2
+  - name: windows2016
+    box: sysnet4admin/Windows2016
     memory: 2048
+    cpus: 2
     provider_options:
       gui: false
 provisioner:
   name: ansible
   lint:
     name: ansible-lint
+  inventory:
+    group_vars:
+      all:
+        proxy_address: "example.com"
+        proxy_port: 3128
+        proxy_whitelist:
+          - ".google.com"
+          - ".stone.com"
   connection_options:
     ansible_connection: winrm
     ansible_host: 127.0.0.1
@@ -27,7 +35,7 @@ provisioner:
     ansible_winrm_transport: ntlm
     ansible_winrm_scheme: http
 scenario:
-  name: windows-enable
+  name: windows
 verifier:
   name: testinfra
   lint:
