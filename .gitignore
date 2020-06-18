@@ -1,0 +1,7 @@
+molecule/*/.molecule
+*.pyc
+molecule/*/tests/__pycache__
+molecule/*/.pytest_cache
+.vscode
+*.log
+.pytest_cache
