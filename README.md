@@ -1,9 +1,11 @@
-stone-payments.proxy
-====================
+# Stone Payments - Proxy
+
 Role for Ansible which configures the proxy client parameters in GNU/Linux and Windows systems.
 
 ## Usage
+
 Just include the role and set the variables in the `defaults/main.yml` file:
+
 ```yaml
 - name: configure proxy client
   hosts: all
@@ -15,11 +17,11 @@ Just include the role and set the variables in the `defaults/main.yml` file:
 ```
 
 ## Advanced usage
-You may also setup another proxy protocol than HTTP (SOCKS or SOCKS5, maybe)
-and setup authentication by using the following vars:
+
+You may also setup another proxy protocol than HTTP (SOCKS or SOCKS5, maybe) and setup authentication by using the following vars:
 
 ```yaml
-proxy_proto: "http" #may be http, socks or socks5
+proxy_proto: "http" # may be http, socks or socks5
 proxy_address: ""
 proxy_port: ""
 proxy_auth: false
@@ -30,13 +32,11 @@ proxy_whitelist:
   - "localhost"
 ```
 
-If you're going to use authentication, you need both to inform the user/pass
-and enable it by setting `proxy_auth` to true.
-
-You may also pass a list in `proxy_whitelist` with names or IPs that you do not
-want to use the proxy and access directly.
+- If you're going to use authentication, you need both to inform the user/pass and enable it by setting `proxy_auth` to true.
+- You may also pass a list in `proxy_whitelist` with names or IPs that you do not want to use the proxy and access directly.
 
 ## Testing
+
 This role implements unit tests with [Molecule](https://molecule.readthedocs.io/) on Vagrant for Windows tests. Notice
 that we only support Molecule 2.0 or greater. You can install Molecule inside a virtual environment with the following
 command:
@@ -58,7 +58,9 @@ molecule converge [-s scenario_name]
 Where `scenario_name` is the name of a test case under `molecule`.
 
 ## Contributing
+
 Just open a PR. We love PRs!
 
 ## License
+
 This code is licensed under the MIT license.
