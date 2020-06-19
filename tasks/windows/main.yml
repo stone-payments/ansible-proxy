@@ -4,7 +4,6 @@
   when:
     - proxy_address | length > 0
     - proxy_port != ""
-  become_method: runas
   tags:
     - proxy
     - proxy_disable
@@ -13,7 +12,6 @@
 - name: Include tasks to disable proxy into windows host
   include_tasks: disable.yml
   when: proxy_address | length == 0 or proxy_port == ""
-  become_method: runas
   tags:
     - proxy
     - proxy_disable
