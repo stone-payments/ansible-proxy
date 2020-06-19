@@ -19,7 +19,7 @@ provisioner:
         proxy_port: 3128
         proxy_whitelist:
           - ".google.com"
-          - ".stone.com"
+          - ".stone.com.br"
   lint:
     name: ansible-lint
 verifier:

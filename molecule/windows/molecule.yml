@@ -25,7 +25,7 @@ provisioner:
         proxy_port: 3128
         proxy_whitelist:
           - ".google.com"
-          - ".stone.com"
+          - ".stone.com.br"
   connection_options:
     ansible_connection: winrm
     ansible_host: 127.0.0.1
