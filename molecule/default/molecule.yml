@@ -1,0 +1,28 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+  name: yamllint
+platforms:
+  - name: centos7
+    box: bento/centos-7.7
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      all:
+        proxy_address: "example.com"
+        proxy_port: 3128
+        proxy_whitelist:
+          - ".google.com"
+          - ".stone.com.br"
+  lint:
+    name: ansible-lint
+verifier:
+  name: testinfra
+  lint:
+    name: flake8

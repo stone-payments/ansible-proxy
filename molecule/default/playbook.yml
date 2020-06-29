@@ -1,5 +1,6 @@
 ---
-- name: Disable proxy into windows host
+- name: Enable proxy into linux host
   hosts: all
+  become: true
   roles:
     - role: stone-payments.proxy

@@ -1,8 +1,8 @@
 ---
-- name: run Windows tasks
+- name: Run Windows tasks
   include_tasks: windows/main.yml
   when: ansible_os_family == "Windows"
 
-- name: run GNU/Linux tasks
+- name: Run GNU/Linux tasks
   include_tasks: linux/main.yml
   when: ansible_os_family != "Windows"

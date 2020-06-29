@@ -1,23 +1,18 @@
 ---
-- name: ensure minimum version of xNetworking resource is present
-  win_psmodule:
-    name: xNetworking
-    minimum_version: "5.3.0.0"
-    repository: PSGallery
-    allow_clobber: true
-    state: present
-    become_method: runas
-
-- include: enable.yml
-  when: proxy_address != "" and proxy_port != ""
-  tags:
-    - proxy
-    - proxy_enable
-  become_method: runas
-
-- include: disable.yml
-  when: proxy_address == "" or proxy_port == ""
+- name: Include tasks to enable proxy into windows host
+  include_tasks: enable.yml
+  when:
+    - proxy_address | length > 0
+    - proxy_port != ""
   tags:
     - proxy
     - proxy_disable
-  become_method: runas
+    - skip_ansible_lint
+
+- name: Include tasks to disable proxy into windows host
+  include_tasks: disable.yml
+  when: proxy_address | length == 0 or proxy_port == ""
+  tags:
+    - proxy
+    - proxy_disable
+    - skip_ansible_lint

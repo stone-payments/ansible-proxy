@@ -1,11 +1,24 @@
 ---
-proxy_proto: "http" #may be http, socks or socks5
+# May be http, socks or socks5
+proxy_proto: "http"
 proxy_address: ""
 proxy_port: ""
+
+# To use proxy with authentication
 proxy_auth: false
 proxy_user: ""
 proxy_pass: ""
-proxy_redhat: false #configure yum and RHSM to use the proxy
+
+# Configure yum and RHSM to use the proxy
+proxy_redhat: false
+
+# Used to set or remove proxy settings for Windows INet which includes Internet Explorer
+proxy_win_inet: true
+
+# Used to set, remove, or import proxy settings for Windows HTTP Services WinHTTP
+proxy_win_http: false
+
+# Sets the list of hosts that will bypass the set proxy when being accessed
 proxy_whitelist:
   - "127.0.0.1"
   - "localhost"
