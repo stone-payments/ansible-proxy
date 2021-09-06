@@ -41,3 +41,14 @@
   file:
     path: "/etc/profile.d/proxy.sh"
     state: absent
+
+- name: Ensure that sudo not use the proxy
+  blockinfile:
+    path: /etc/sudoers
+    insertafter: '(^Defaults\s+env_keep)'
+    block: |
+      Defaults    env_keep += "ftp_proxy http_proxy https_proxy no_proxy"
+    marker: "# {mark} - Ansible managed block - Ensure that sudo use the proxy"
+    state: absent
+    validate: /usr/sbin/visudo -cf %s
+  when: proxy_sudo | bool

@@ -30,6 +30,9 @@ proxy_proto: "http"
 proxy_address: ""
 proxy_port: ""
 
+# To keep proxy settings when using sudo 
+proxy_sudo: true
+
 # To use proxy with authentication
 proxy_auth: false
 proxy_user: ""
