@@ -125,7 +125,7 @@
           value: "{{ proxy_whitelist | join(',') }}"
         - key: NO_PROXY
           value: "{{ proxy_whitelist | join(',') }}"
-      register: proxy_systemd_result is changed
+      when: proxy_systemd_result is changed
       notify: Reload systemd
   when: proxy_systemd | bool
 

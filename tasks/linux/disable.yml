@@ -66,14 +66,13 @@
 
 - name: Task block to disable proxy on SystemD
   block:
-    - name: Configure the systemd to use the proxy
-      template:
-        src: proxy.conf.j2
-        dest: /etc/systemd/system.conf.d/proxy.conf
+    - name: Configure the systemd to no use the proxy
+      file:
+        path: /etc/systemd/system.conf.d/proxy.conf
         state: absent
       register: proxy_systemd_result
 
-    - name: Configure the systemd to use the proxy at runtime
+    - name: Configure the systemd to no use the proxy at runtime
       command: systemctl unset-environment {{ item }}
       loop:
         - proxy
