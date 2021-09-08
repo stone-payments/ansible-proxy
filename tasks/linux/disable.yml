@@ -63,3 +63,29 @@
     - name: Force collect ansible_env facts to unload http_proxy environment variable
       setup:
   when: (proxy_profile_result is changed) or (proxy_sudo_result is changed)
+
+- name: Task block to disable proxy on SystemD
+  block:
+    - name: Configure the systemd to use the proxy
+      template:
+        src: proxy.conf.j2
+        dest: /etc/systemd/system.conf.d/proxy.conf
+        state: absent
+      register: proxy_systemd_result
+
+    - name: Configure the systemd to use the proxy at runtime
+      command: systemctl unset-environment {{ item }}
+      loop:
+        - proxy
+        - http_proxy
+        - https_proxy
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - no_proxy
+        - NO_PROXY
+      when: proxy_systemd_result is changed
+      notify: Reload systemd
+
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+  when: proxy_systemd | bool
