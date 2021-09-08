@@ -59,3 +59,75 @@
     src: "proxy.profile.j2"
     dest: "/etc/profile.d/proxy.sh"
     mode: "0755"
+  register: proxy_profile_result
+
+- name: Ensure that sudo use the proxy
+  blockinfile:
+    path: /etc/sudoers
+    insertafter: '(^Defaults\s+env_keep)'
+    block: |
+      Defaults    env_keep += "ftp_proxy http_proxy https_proxy no_proxy"
+    marker: "# {mark} - Ansible managed block - Ensure that sudo use the proxy"
+    state: present
+    validate: /usr/sbin/visudo -cf %s
+  register: proxy_sudo_result
+  when: proxy_sudo | bool
+
+- name: Force reload gathered facts
+  block:
+    - name: Clear gathered facts from all currently targeted hosts
+      meta: clear_facts
+
+    - name: Force collect ansible_env facts to load http_proxy environment variable
+      setup:
+  when: (proxy_profile_result is changed) or (proxy_sudo_result is changed)
+
+- name: Task block to configure proxy on SystemD
+  block:
+    - name: Create system.conf.d folder
+      file:
+        path: /etc/systemd/system.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Set fact proxy address
+      set_fact:
+        proxy_url: "{{ proxy_url_auth if (proxy_auth is defined and proxy_auth | bool) else proxy_url }}"
+      vars:
+        proxy_url_auth: "{{ proxy_proto }}://{{ proxy_user }}:{{ proxy_pass }}@{{ proxy_address }}:{{ proxy_port }}"
+        proxy_url: "{{ proxy_proto }}://{{ proxy_address }}:{{ proxy_port }}"
+
+    - name: Configure the systemd to use the proxy
+      template:
+        src: proxy.conf.j2
+        dest: /etc/systemd/system.conf.d/proxy.conf
+        owner: root
+        group: root
+        mode: 0644
+      register: proxy_systemd_result
+
+    - name: Configure the systemd to use the proxy at runtime
+      command: systemctl set-environment {{ item.key }}={{ item.value }}
+      loop:
+        - key: proxy
+          value: "{{ proxy_url }}"
+        - key: http_proxy
+          value: "{{ proxy_url }}"
+        - key: https_proxy
+          value: "{{ proxy_url }}"
+        - key: HTTP_PROXY
+          value: "{{ proxy_url }}"
+        - key: HTTPS_PROXY
+          value: "{{ proxy_url }}"
+        - key: no_proxy
+          value: "{{ proxy_whitelist | join(',') }}"
+        - key: NO_PROXY
+          value: "{{ proxy_whitelist | join(',') }}"
+      when: proxy_systemd_result is changed
+      notify: Reload systemd
+  when: proxy_systemd | bool
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers

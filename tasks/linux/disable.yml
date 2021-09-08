@@ -41,3 +41,50 @@
   file:
     path: "/etc/profile.d/proxy.sh"
     state: absent
+  register: proxy_profile_result
+
+- name: Ensure that sudo not use the proxy
+  blockinfile:
+    path: /etc/sudoers
+    insertafter: '(^Defaults\s+env_keep)'
+    block: |
+      Defaults    env_keep += "ftp_proxy http_proxy https_proxy no_proxy"
+    marker: "# {mark} - Ansible managed block - Ensure that sudo use the proxy"
+    state: absent
+    validate: /usr/sbin/visudo -cf %s
+  register: proxy_sudo_result
+  when: proxy_sudo | bool
+
+- name: Force reload gathered facts
+  block:
+    - name: Clear gathered facts from all currently targeted hosts
+      meta: clear_facts
+
+    - name: Force collect ansible_env facts to unload http_proxy environment variable
+      setup:
+  when: (proxy_profile_result is changed) or (proxy_sudo_result is changed)
+
+- name: Task block to disable proxy on SystemD
+  block:
+    - name: Configure the systemd to no use the proxy
+      file:
+        path: /etc/systemd/system.conf.d/proxy.conf
+        state: absent
+      register: proxy_systemd_result
+
+    - name: Configure the systemd to no use the proxy at runtime
+      command: systemctl unset-environment {{ item }}
+      loop:
+        - proxy
+        - http_proxy
+        - https_proxy
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - no_proxy
+        - NO_PROXY
+      when: proxy_systemd_result is changed
+      notify: Reload systemd
+  when: proxy_systemd | bool
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers

@@ -1,0 +1,10 @@
+## {{ ansible_managed }}
+
+[Manager]
+DefaultEnvironment=proxy={{ proxy_url }} \
+    http_proxy={{ proxy_url }} \
+    https_proxy={{ proxy_url }} \
+    HTTP_PROXY={{ proxy_url }} \
+    HTTPS_PROXY={{ proxy_url }} \
+    no_proxy={{ proxy_whitelist | join(",") }} \
+    NO_PROXY={{ proxy_whitelist | join(",") }}
