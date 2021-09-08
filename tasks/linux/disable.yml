@@ -85,7 +85,7 @@
         - NO_PROXY
       when: proxy_systemd_result is changed
       notify: Reload systemd
-
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
-      meta: flush_handlers
   when: proxy_systemd | bool
+
+- name: Force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
