@@ -41,6 +41,7 @@
   file:
     path: "/etc/profile.d/proxy.sh"
     state: absent
+  register: proxy_profile_result
 
 - name: Ensure that sudo not use the proxy
   blockinfile:
@@ -51,4 +52,11 @@
     marker: "# {mark} - Ansible managed block - Ensure that sudo use the proxy"
     state: absent
     validate: /usr/sbin/visudo -cf %s
+  register: proxy_sudo_result
   when: proxy_sudo | bool
+
+- name: Force collect ansible_env facts without http_proxy variable
+  setup:
+    filter:
+      - "ansible_env"
+  when: (proxy_profile_result is changed) or (proxy_sudo_result is changed)

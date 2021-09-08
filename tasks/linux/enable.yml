@@ -59,6 +59,7 @@
     src: "proxy.profile.j2"
     dest: "/etc/profile.d/proxy.sh"
     mode: "0755"
+  register: proxy_profile_result
 
 - name: Ensure that sudo use the proxy
   blockinfile:
@@ -69,4 +70,11 @@
     marker: "# {mark} - Ansible managed block - Ensure that sudo use the proxy"
     state: present
     validate: /usr/sbin/visudo -cf %s
+  register: proxy_sudo_result
   when: proxy_sudo | bool
+
+- name: Force collect ansible_env facts with http_proxy variable
+  setup:
+    filter:
+      - "ansible_env"
+  when: (proxy_profile_result is changed) or (proxy_sudo_result is changed)
