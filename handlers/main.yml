@@ -2,3 +2,4 @@
 - name: Reload systemd
   systemd:
     daemon_reload: true
+    daemon_reexec: true
