@@ -73,8 +73,11 @@
   register: proxy_sudo_result
   when: proxy_sudo | bool
 
-- name: Force collect ansible_env facts with http_proxy variable
-  setup:
-    filter:
-      - "ansible_env"
+- name: Force reload gathered facts
+  block:
+    - name: Clear gathered facts from all currently targeted hosts
+      meta: clear_facts
+
+    - name: Force collect ansible_env facts to load http_proxy environment variable
+      setup:
   when: (proxy_profile_result is changed) or (proxy_sudo_result is changed)
