@@ -1,10 +1,13 @@
 on:
+
+permissions:
+  contents: read
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: stone-payments/approved-actions/actions/checkout/v2@stable
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@main
+        uses: stone-payments/approved-actions/ansible/ansible-lint/main@stable
